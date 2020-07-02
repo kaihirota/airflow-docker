@@ -26,10 +26,13 @@ class RedditOperator(BaseOperator):
         """
 
         super(RedditOperator, self).__init__(*args, **kwargs)
+
         self.ticker = ticker
         self.sort_method = sort_method
         self.limit = limit
         self.time_range = time_range
+
+        # self.log.info("Authenticating Reddit API")
 
         self.reddit = praw.Reddit(
                             client_id=cred['personal_use_script'],
@@ -38,6 +41,12 @@ class RedditOperator(BaseOperator):
                             username=cred['username'],
                             password=cred['password'])
 
+        # if self.reddit:
+        #     self.log.info("Connected Reddit API")
+        # else:
+        #     self.log.error(f"Authentication failed. Check Reddit API Credentials")
+        #     raise ValueError(f"Data quality check failed. {table} returned no results")
+
         psql = PostgresHook(postgres_conn_id=postgres_conn_id)
         self.engine = psql.get_sqlalchemy_engine()
 
@@ -45,9 +54,16 @@ class RedditOperator(BaseOperator):
         results = self.reddit.subreddit("all")
         query = f'{self.ticker} self:yes'
         data = []
+
+        self.log.info(f"Querying Reddit: ticker={ticker} time_range={time_range} sort_method={sort_method} limit={limit}")
         search_results = results.search(query,
                                         sort=self.sort_method,
                                         time_filter=self.time_range, limit=self.limit)
+
+        if search_results:
+            self.log.info("Result returned from Reddit")
+        else:
+            self.log.error("Search failed")
 
         for p in search_results:
             if not p.stickied:
@@ -65,6 +81,8 @@ class RedditOperator(BaseOperator):
                     p.author.name
                 ]
                 data += row,
+
+        self.log.info(f"Data has {len(data)} rows")
 
         cols = [
             'post_id', 'created_utc', 'title', 'text', 'upvote', 'downvote', 'comments', 'subreddit', 'permalink', 'author_name'
@@ -89,6 +107,8 @@ class RedditOperator(BaseOperator):
             'comments': INTEGER
         }
 
+        self.log.info("Saving data to tmp table")
         # save to tmp table. replace content.
         df.to_sql('tmp', self.engine, index=False,
                   if_exists='replace', dtype=dtypes_map)
+        self.log.info("Saved.")

@@ -14,10 +14,13 @@ class NLPOperator(BaseOperator):
     def __init__(self, postgres_conn_id: str, *args, **kwargs):
         super(NLPOperator, self).__init__(*args, **kwargs)
 
+        # self.log.info("Initializing NLPOperator")
+
         self.psql = PostgresHook(postgres_conn_id=postgres_conn_id)
         self.engine = self.psql.get_sqlalchemy_engine()
         self.query = """SELECT * FROM tmp"""
 
+        # self.log.info("Loading NLTK Vader SentimentIntensityAnalyzer")
         try:
             self.analyzer = SentimentIntensityAnalyzer()
         except:
@@ -25,8 +28,12 @@ class NLPOperator(BaseOperator):
             self.analyzer = SentimentIntensityAnalyzer()
 
     def execute(self, context):
+        self.log.info("Loading Spacy")
         nlp = spacy.load("en_core_web_sm")
+
+        self.log.info("Fetching data from tmp table")
         df = self.psql.get_pandas_df(sql=self.query, parameters=None)
+        self.log.info("Fetched data from tmp table :", df.shape)
 
         def nlp_pipeline(txt):
             """
@@ -51,7 +58,9 @@ class NLPOperator(BaseOperator):
         df['title_cleaned'] = df['title_cleaned'].apply(nlp_pipeline)
         df['text_cleaned'] = df['text_cleaned'].apply(nlp_pipeline)
 
+        self.log.info("Performing Sentiment Analysis..")
         scores = defaultdict(list)
+
         for idx, row in df.iterrows():
             result = self.analyzer.polarity_scores(row['title'])
             scores['neg'] += result['neg'],
@@ -81,5 +90,7 @@ class NLPOperator(BaseOperator):
             'pos': FLOAT,
             'compound': FLOAT
         }
+
+        self.log.info("Sentiment analysis complete. Inserting data to reddit table")
         df.to_sql('reddit', self.engine, index=False,
                   if_exists='append', dtype=dtypes_map)

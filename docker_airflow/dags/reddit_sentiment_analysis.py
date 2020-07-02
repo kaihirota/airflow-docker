@@ -35,7 +35,7 @@ dag_name='Reddit_Sentiment_Analysis'
 dag = DAG(dag_name,
           default_args=default_args,
           description='Search Reddit headlines about specified stock; run sentiment analysis.',
-          schedule_interval=timedelta(minutes=5))
+          schedule_interval='@once')
 
 start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
@@ -50,7 +50,7 @@ reddit_credentials = {
 postgres_conn_id = os.environ['DB_AIRFLOW_CONN_ID']
 ticker = 'TSLA'
 sort_method = 'new'
-limit = 5
+limit = 100
 time_range = 'all'
 
 reddit_operator = RedditOperator(task_id='Get_data_from_reddit',
