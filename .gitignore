@@ -132,6 +132,6 @@ dmypy.json
 .DS_Store
 
 docker_airflow/.env
+docker_airflow/logs
 docker_airflow/plugins/example
-docker_airflow/dags/example.py
 Untitled.ipynb
