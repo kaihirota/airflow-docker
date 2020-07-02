@@ -133,3 +133,5 @@ dmypy.json
 
 credentials.py
 docker_airflow/.env
+docker_airflow/plugins/example
+docker_airflow/dags/example.py
