@@ -21,15 +21,22 @@ ENV LC_MESSAGES en_US.UTF-8
 # Disable noisy "Handling signal" log messages:
 # ENV GUNICORN_CMD_ARGS --log-level WARNING
 
+######### Set up project directory #########
+
 # Copy AIRFLOW files
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 COPY requirements.txt ${AIRFLOW_USER_HOME}/requirements.txt
 COPY dags ${AIRFLOW_USER_HOME}/dags
 COPY plugins ${AIRFLOW_USER_HOME}/plugins
+COPY unittests.cfg ${AIRFLOW_USER_HOME}/unittests.cfg
 
-ARG FERNET_KEY
-ENV FERNET_KEY=$FERNET_KEY
+# Mount log directory
+# VOLUME logs:${AIRFLOW_USER_HOME}/logs
+
+######### Pass environment variables #########
+
+ENV FERNET_KEY=Yw_InL2KVsUqnfyAMfh17mHi1zSj_KmMgffs5QSKx28=
 
 # PROJECT ENV VARIABLES
 # ARG REDDIT_PERSONAL_USER_SCRIPT
@@ -46,6 +53,8 @@ ENV FERNET_KEY=$FERNET_KEY
 # ENV DB_PW=${DB_PW}
 # ENV DB_HOST=${DB_HOST}
 # ENV DB_PORT=${DB_PORT}
+
+######### Packages #########
 
 RUN set -ex \
     && buildDeps=' \

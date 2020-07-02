@@ -33,7 +33,7 @@ class NLPOperator(BaseOperator):
 
         self.log.info("Fetching data from tmp table")
         df = self.psql.get_pandas_df(sql=self.query, parameters=None)
-        self.log.info("Fetched data from tmp table :", df.shape)
+        self.log.info(f"Fetched data from tmp table : {df.shape}")
 
         def nlp_pipeline(txt):
             """

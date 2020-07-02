@@ -13,24 +13,10 @@ class RedditOperator(BaseOperator):
     def __init__(self,
                  cred,
                  postgres_conn_id: str,
-                 ticker: str,
-                 time_range: str,
-                 sort_method='new',
-                 limit=5,
                  *args,
                  **kwargs):
-        """
-        input:
-        sort_method: relevance, hot, top, new, comments. (default new).
-        time_range: all, day, hour, month, week, year (default: all).
-        """
 
         super(RedditOperator, self).__init__(*args, **kwargs)
-
-        self.ticker = ticker
-        self.sort_method = sort_method
-        self.limit = limit
-        self.time_range = time_range
 
         # self.log.info("Authenticating Reddit API")
 
@@ -50,15 +36,37 @@ class RedditOperator(BaseOperator):
         psql = PostgresHook(postgres_conn_id=postgres_conn_id)
         self.engine = psql.get_sqlalchemy_engine()
 
+
     def execute(self, context):
+        """
+        input:
+            sort_method: relevance, hot, top, new, comments. (default new).
+            time_range: all, day, hour, month, week, year (default: all).
+        """
+
+        ticker = context["dag_run"].conf["ticker"]
+        limit = context["dag_run"].conf["limit"]
+
+        if 'sort_method' in context["dag_run"].conf:
+            sort_method = context["dag_run"].conf["sort_method"]
+        else:
+            sort_method = 'new'
+
+        if 'time_range' in context["dag_run"].conf:
+            time_range = context["dag_run"].conf["time_range"]
+        else:
+            time_range = 'all'
+
         results = self.reddit.subreddit("all")
-        query = f'{self.ticker} self:yes'
+        query = f'{ticker} self:yes'
         data = []
 
         self.log.info(f"Querying Reddit: ticker={ticker} time_range={time_range} sort_method={sort_method} limit={limit}")
+
         search_results = results.search(query,
-                                        sort=self.sort_method,
-                                        time_filter=self.time_range, limit=self.limit)
+                                        sort=sort_method,
+                                        time_filter=time_range,
+                                        limit=limit)
 
         if search_results:
             self.log.info("Result returned from Reddit")
@@ -89,14 +97,14 @@ class RedditOperator(BaseOperator):
         ]
 
         df = pd.DataFrame(data, columns=cols)
-        df['stock'] = self.ticker
+        df['stock'] = ticker
         df['saved_dt_utc'] = dt.datetime.now().isoformat()
         df['created_utc'] = pd.to_datetime(df['created_utc'])
         df['saved_dt_utc'] = pd.to_datetime(df['saved_dt_utc'])
         df['upvote'] = df['upvote'].astype(int)
         df['downvote'] = df['downvote'].astype(int)
         df['comments'] = df['comments'].astype(int)
-        df['title_cleaned'] = df['title'].str.replace(self.ticker, '')
+        df['title_cleaned'] = df['title'].str.replace(ticker, '')
         df['text_cleaned'] = df['text'].str.replace('(\n)+', ' ')
 
         dtypes_map = {
@@ -108,6 +116,7 @@ class RedditOperator(BaseOperator):
         }
 
         self.log.info("Saving data to tmp table")
+
         # save to tmp table. replace content.
         df.to_sql('tmp', self.engine, index=False,
                   if_exists='replace', dtype=dtypes_map)

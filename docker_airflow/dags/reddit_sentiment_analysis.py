@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import os
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 from reddit_operator import RedditOperator
 from nlp_operator import NLPOperator
@@ -11,7 +12,7 @@ default_args = {
     'start_date': days_ago(1),
     # 'end_date': datetime(2030, 1, 1),
     'depends_on_past': False,
-    'retries': 1,
+    # 'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'catchup': False,
     'email_on_retry': False,
@@ -35,7 +36,7 @@ dag_name='Reddit_Sentiment_Analysis'
 dag = DAG(dag_name,
           default_args=default_args,
           description='Search Reddit headlines about specified stock; run sentiment analysis.',
-          schedule_interval='@once')
+          schedule_interval=None)
 
 start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
@@ -48,20 +49,32 @@ reddit_credentials = {
 }
 
 postgres_conn_id = os.environ['DB_AIRFLOW_CONN_ID']
-ticker = 'TSLA'
-sort_method = 'new'
-limit = 100
-time_range = 'all'
+
+"""
+NOTE:
+2 ways of passing arguments to DAGs
+
+1. kwargs["ticker"]
+kwargs["ticker"] available in __init__
+pass '{{ dag_run.conf["ticker"] }}' into the operator like:
+
+    reddit_operator = RedditOperator(task_id='Get_data_from_reddit',
+                                     dag=dag,
+                                     provide_context=True,
+                                     cred=reddit_credentials,
+                                     ticker = '{{ dag_run.conf["ticker"] }}',
+
+2. context["dag_run"].conf["ticker"]
+context["dag_run"].conf["ticker"] available in .execute() if  provide_context=True is passed when constructing Operator instance
+
+"""
 
 reddit_operator = RedditOperator(task_id='Get_data_from_reddit',
-                                 cred=reddit_credentials,
                                  dag=dag,
                                  provide_context=True,
-                                 postgres_conn_id=postgres_conn_id,
-                                 ticker=ticker,
-                                 sort_method=sort_method,
-                                 limit=limit,
-                                 time_range=time_range)
+                                 cred=reddit_credentials,
+                                 ticker = '{{ dag_run.conf["ticker"] }}',
+                                 postgres_conn_id=postgres_conn_id)
 
 nlp_operator = NLPOperator(task_id='Run_NLP_pipeline',
                            dag=dag,
