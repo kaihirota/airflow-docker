@@ -1,37 +1,32 @@
 from collections import defaultdict
 import datetime as dt
-
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 import pandas as pd
 from sqlalchemy import INTEGER, TIMESTAMP, FLOAT
 import spacy
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 class NLPOperator(BaseOperator):
     @apply_defaults
-    def __init__(self, postgres_conn_id: str, query: str, *args, **kwargs):
+    def __init__(self, postgres_conn_id: str, *args, **kwargs):
         super(NLPOperator, self).__init__(*args, **kwargs)
 
-        psql = PostgresHook(postgres_conn_id=postgres_conn_id)
+        self.psql = PostgresHook(postgres_conn_id=postgres_conn_id)
+        self.engine = self.psql.get_sqlalchemy_engine()
+        self.query = """SELECT * FROM tmp"""
 
         try:
-            self.df = psql.get_pandas_df(sql=query, parameters=None)
-            self.engine = psql.get_sqlalchemy_engine()
+            self.analyzer = SentimentIntensityAnalyzer()
         except:
-            #TODO: delete later, this should be done when launching docker
-            from cryptography.fernet import Fernet
-            import os
-            FERNET_KEY = Fernet.generate_key().decode()
-            os.environ['AIRFLOW__CORE__FERNET_KEY'] = FERNET_KEY
-
-            self.df = psql.get_pandas_df(sql=query, parameters=None)
-            self.engine = psql.get_sqlalchemy_engine()
+            nltk.download('vader_lexicon')
+            self.analyzer = SentimentIntensityAnalyzer()
 
     def execute(self, context):
         nlp = spacy.load("en_core_web_sm")
-        df = self.df.copy()
+        df = self.psql.get_pandas_df(sql=self.query, parameters=None)
 
         def nlp_pipeline(txt):
             """
@@ -58,7 +53,7 @@ class NLPOperator(BaseOperator):
 
         scores = defaultdict(list)
         for idx, row in df.iterrows():
-            result = analyzer.polarity_scores(row['title'])
+            result = self.analyzer.polarity_scores(row['title'])
             scores['neg'] += result['neg'],
             scores['neut'] += result['neu'],
             scores['pos'] += result['pos'],

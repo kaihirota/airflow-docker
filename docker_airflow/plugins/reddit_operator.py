@@ -1,6 +1,5 @@
 from collections import defaultdict
 import datetime as dt
-
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
@@ -8,20 +7,11 @@ import pandas as pd
 from sqlalchemy import INTEGER, TIMESTAMP, FLOAT
 import praw
 
-# from credentials import cred
-cred = {
-    'reddit': {
-        "personal_use_script": "Et6PCJr09YeKzg",
-        "secret": "Rw9Ix_g2uh7SWoqQuLW51a302yc",
-        "username": "noname7743",
-        "password": "from81@SV",
-        "user_agent": "nlp-airflow"
-    }
-}
-
 class RedditOperator(BaseOperator):
+
     @apply_defaults
     def __init__(self,
+                 cred,
                  postgres_conn_id: str,
                  ticker: str,
                  time_range: str,
@@ -34,29 +24,22 @@ class RedditOperator(BaseOperator):
         sort_method: relevance, hot, top, new, comments. (default new).
         time_range: all, day, hour, month, week, year (default: all).
         """
+
         super(RedditOperator, self).__init__(*args, **kwargs)
         self.ticker = ticker
         self.sort_method = sort_method
         self.limit = limit
         self.time_range = time_range
+
         self.reddit = praw.Reddit(
-                            client_id=cred['reddit']['personal_use_script'],
-                            client_secret=cred['reddit']['secret'],
-                            user_agent=cred['reddit']['user_agent'],
-                            username=cred['reddit']['username'],
-                            password=cred['reddit']['password'])
+                            client_id=cred['personal_use_script'],
+                            client_secret=cred['secret'],
+                            user_agent=cred['user_agent'],
+                            username=cred['username'],
+                            password=cred['password'])
+
         psql = PostgresHook(postgres_conn_id=postgres_conn_id)
-
-        try:
-            self.engine = psql.get_sqlalchemy_engine()
-        except:
-            #TODO: delete later, this should be done when launching docker
-            from cryptography.fernet import Fernet
-            import os
-            FERNET_KEY = Fernet.generate_key().decode()
-            os.environ['AIRFLOW__CORE__FERNET_KEY'] = FERNET_KEY
-
-            self.engine = psql.get_sqlalchemy_engine()
+        self.engine = psql.get_sqlalchemy_engine()
 
     def execute(self, context):
         results = self.reddit.subreddit("all")
@@ -84,8 +67,7 @@ class RedditOperator(BaseOperator):
                 data += row,
 
         cols = [
-            'post_id', 'created_utc', 'title', 'text', 'upvote', 'downvote', 'comments', 'subreddit', 'permalink',
-            'author_id', 'author_name', 'author_has_verified_email'
+            'post_id', 'created_utc', 'title', 'text', 'upvote', 'downvote', 'comments', 'subreddit', 'permalink', 'author_name'
         ]
 
         df = pd.DataFrame(data, columns=cols)
@@ -98,5 +80,15 @@ class RedditOperator(BaseOperator):
         df['comments'] = df['comments'].astype(int)
         df['title_cleaned'] = df['title'].str.replace(self.ticker, '')
         df['text_cleaned'] = df['text'].str.replace('(\n)+', ' ')
+
+        dtypes_map = {
+            'created_utc': TIMESTAMP,
+            'saved_dt_utc': TIMESTAMP,
+            'upvote': INTEGER,
+            'downvote': INTEGER,
+            'comments': INTEGER
+        }
+
+        # save to tmp table. replace content.
         df.to_sql('tmp', self.engine, index=False,
                   if_exists='replace', dtype=dtypes_map)

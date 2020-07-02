@@ -131,7 +131,7 @@ dmypy.json
 # jupyter
 .DS_Store
 
-credentials.py
 docker_airflow/.env
 docker_airflow/plugins/example
 docker_airflow/dags/example.py
+Untitled.ipynb
