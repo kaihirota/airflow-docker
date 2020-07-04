@@ -25,10 +25,10 @@ ENV LC_MESSAGES en_US.UTF-8
 
 # Copy AIRFLOW files
 COPY script/entrypoint.sh /entrypoint.sh
-COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 COPY requirements.txt ${AIRFLOW_USER_HOME}/requirements.txt
 COPY dags ${AIRFLOW_USER_HOME}/dags
 COPY plugins ${AIRFLOW_USER_HOME}/plugins
+COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 COPY unittests.cfg ${AIRFLOW_USER_HOME}/unittests.cfg
 
 # Mount log directory
@@ -37,22 +37,6 @@ COPY unittests.cfg ${AIRFLOW_USER_HOME}/unittests.cfg
 ######### Pass environment variables #########
 
 ENV FERNET_KEY=Yw_InL2KVsUqnfyAMfh17mHi1zSj_KmMgffs5QSKx28=
-
-# PROJECT ENV VARIABLES
-# ARG REDDIT_PERSONAL_USER_SCRIPT
-# ENV REDDIT_PERSONAL_USER_SCRIPT=$REDDIT_PERSONAL_USER_SCRIPT
-# ENV REDDIT_SECRET=${REDDIT_SECRET}
-# ENV REDDIT_USERNAME=${REDDIT_USERNAME}
-# ENV REDDIT_PW=${REDDIT_PW}
-# ENV REDDIT_USER_AGENT=${REDDIT_USER_AGENT}
-
-# ARG DB_AIRFLOW_CONN_ID
-# ENV DB_AIRFLOW_CONN_ID=$DB_AIRFLOW_CONN_ID
-# ENV DB_NAME=${DB_NAME}
-# ENV DB_USERNAME=${DB_USERNAME}
-# ENV DB_PW=${DB_PW}
-# ENV DB_HOST=${DB_HOST}
-# ENV DB_PORT=${DB_PORT}
 
 ######### Packages #########
 
@@ -88,7 +72,6 @@ RUN set -ex \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
     && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
-    && pip install 'redis==3.2' \
     && if [ -n "${PYTHON_DEPS}" ]; then pip install ${PYTHON_DEPS}; fi \
     && pip install --user -r ${AIRFLOW_USER_HOME}/requirements.txt \
     && apt-get purge --auto-remove -yqq $buildDeps \

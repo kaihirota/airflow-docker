@@ -4,8 +4,9 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
-from reddit_operator import RedditOperator
+from data_quality_operator import DataQualityOperator
 from nlp_operator import NLPOperator
+from reddit_operator import RedditOperator
 
 default_args = {
     'owner': 'kai',
@@ -81,16 +82,12 @@ nlp_operator = NLPOperator(task_id='Run_NLP_pipeline',
                            provide_context=True,
                            postgres_conn_id=postgres_conn_id)
 
-# run_quality_checks = DataQualityOperator(
-#     task_id='Run_data_quality_checks',
-#     dag=dag,
-#     provide_context=True,
-#     aws_credentials_id="aws_credentials",
-#     redshift_conn_id='redshift',
-#     tables=["songplay", "users", "song", "artist", "time"]
-# )
+run_quality_checks = DataQualityOperator(task_id='Run_data_quality_checks',
+                                         dag=dag,
+                                         provide_context=True,
+                                         postgres_conn_id=postgres_conn_id)
 
 end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
 # Setting tasks dependencies
-start_operator >> reddit_operator >> nlp_operator >> end_operator
+start_operator >> reddit_operator >> run_quality_checks >> nlp_operator >> end_operator

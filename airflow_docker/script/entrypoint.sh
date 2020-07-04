@@ -1,10 +1,5 @@
 #!/usr/bin/sh
 
-# User-provided configuration must always be respected.
-#
-# Therefore, this script must only derives Airflow AIRFLOW__ variables from other variables
-# when the user did not provide their own configuration.
-
 set -x
 TRY_LOOP="20"
 

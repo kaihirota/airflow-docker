@@ -10,6 +10,7 @@ import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 class NLPOperator(BaseOperator):
+
     @apply_defaults
     def __init__(self, postgres_conn_id: str, *args, **kwargs):
         super(NLPOperator, self).__init__(*args, **kwargs)
