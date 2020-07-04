@@ -12,7 +12,7 @@ services:
         #         max-size: 10m
         #         max-file: "3"
         volumes:
-            - airflow_docker/logs:/usr/local/airflow/logs
+            - ./airflow_docker/logs:/usr/local/airflow/logs
         ports:
             - "8080:8080"
         command: webserver
@@ -30,8 +30,8 @@ services:
         env_file: .env
         # environment:
         #     MAPBOX_API_KEY: ${MAPBOX_API_KEY}
-        # volumes:
-        #     - superset_docker/superset_config.py:/etc/superset/superset_config.py
+        volumes:
+            - ./superset_docker/superset_config.py:/etc/superset/superset_config.py
         ports:
             - "9999:8088"
         # command: ["gunicorn", "superset:app"]

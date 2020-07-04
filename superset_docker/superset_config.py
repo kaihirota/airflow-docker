@@ -14,11 +14,12 @@
 # # KIND, either express or implied.  See the License for the
 # # specific language governing permissions and limitations
 # # under the License.
-# """The main config file for Superset
-# All configuration in this file can be overridden by providing a superset_config
-# in your PYTHONPATH as there is a ``from superset_config import *``
-# at the end of this file.
-# """
+from superset_config import *
+"""The main config file for Superset
+All configuration in this file can be overridden by providing a superset_config
+in your PYTHONPATH as there is a ``from superset_config import *``
+at the end of this file.
+"""
 # import imp
 # import importlib.util
 # import json
@@ -39,7 +40,7 @@
 #     BaseTemplateProcessor,
 # )
 # from superset.stats_logger import DummyStatsLogger
-# from superset.typing import CacheConfig
+from superset.typing import CacheConfig
 # from superset.utils.log import DBEventLogger
 # from superset.utils.logging_configurator import DefaultLoggingConfigurator
 #
@@ -349,7 +350,11 @@
 # # IMG_SIZE = (300, 200, True)
 #
 # CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24
-# CACHE_CONFIG: CacheConfig = {"CACHE_TYPE": "null"}
+CACHE_CONFIG: CacheConfig = {
+    "CACHE_TYPE": "filesystem",
+    "CACHE_DEFAULT_TIMEOUT": 60 * 60 * 24,
+    "CACHE_DIR": "cache"
+}
 # TABLE_NAMES_CACHE_CONFIG: CacheConfig = {"CACHE_TYPE": "null"}
 #
 # # CORS Options
