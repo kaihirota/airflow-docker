@@ -132,7 +132,8 @@ dmypy.json
 .DS_Store
 
 airflow_docker/.env
-airflow_docker/logs
+airflow_docker/logs/
+airflow_docker/logs/*
 docker_airflow/plugins/example
 Untitled.ipynb
 superset_docker/cache
