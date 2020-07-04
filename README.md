@@ -13,7 +13,9 @@ TODO: Add template `.env` file
 docker-compose up --build
 
 # First two commands build the containers. Once built, just run the last command to compose / run to save time.
-docker build --rm -f airflow_docker/Dockerfile -t airflow_image:latest .
+# in airflow_docker/
+docker build --rm -f Dockerfile -t airflow_image:latest .
+# in superset_docker/
 docker build --rm -f airflow_superset/Dockerfile -t superset_image:latest .
 docker-compose up
 ```
