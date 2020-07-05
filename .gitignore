@@ -131,5 +131,4 @@ dmypy.json
 # jupyter
 .DS_Store
 
-airflow_docker/.env
 logs/
