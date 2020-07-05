@@ -133,6 +133,3 @@ dmypy.json
 
 airflow_docker/.env
 logs/
-docker_airflow/plugins/example/
-Untitled.ipynb
-superset_docker/cache/
