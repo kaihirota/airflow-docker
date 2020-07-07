@@ -14,9 +14,11 @@ default_args = {
     # 'end_date': datetime(2030, 1, 1),
     'depends_on_past': False,
     # 'retries': 1,
+    'email': ['kai@khirota.co'],
+    'email_on_failure': True,
+    'email_on_retry': False,
     'retry_delay': timedelta(minutes=5),
     'catchup': False,
-    'email_on_retry': False,
     'max_active_runs': 1
 }
 

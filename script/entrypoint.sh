@@ -16,6 +16,8 @@ export AIRFLOW_HOME \
        AIRFLOW__CORE__FERNET_KEY \
        AIRFLOW__CORE__LOAD_EXAMPLES
 
+export AIRFLOW__SMTP__SMTP_PASSWORD=${SMTP_PASSWORD}
+
 # export AIRFLOW_CONN_POSTGRES_TEST=postgresql://${DB_USERNAME}:${DB_NAME}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 
 case "$1" in
@@ -23,6 +25,11 @@ case "$1" in
     airflow initdb
 
     ## this method, unlike setting AIRFLOW_CONN_x environment variable, shows up in Airflow UI. however it must be executed after airflow initdb
+
+    # s3 logging
+    airflow connections -a --conn_id ${S3_CONN_ID} --conn_uri "s3://${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}@${S3_BUCKET}/logs"
+
+    # main db
     airflow connections -a --conn_id ${DB_AIRFLOW_CONN_ID} --conn_uri "postgresql://${DB_USERNAME}:${DB_PW}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
     if [ "$AIRFLOW__CORE__EXECUTOR" = "LocalExecutor" ] || [ "$AIRFLOW__CORE__EXECUTOR" = "SequentialExecutor" ]; then

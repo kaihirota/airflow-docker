@@ -29,10 +29,8 @@ COPY requirements.txt ${AIRFLOW_USER_HOME}/requirements.txt
 COPY dags ${AIRFLOW_USER_HOME}/dags
 COPY plugins ${AIRFLOW_USER_HOME}/plugins
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
+COPY config/email_template.html ${AIRFLOW_USER_HOME}/email_template.html
 COPY unittests.cfg ${AIRFLOW_USER_HOME}/unittests.cfg
-
-# Mount log directory
-# VOLUME logs:${AIRFLOW_USER_HOME}/logs
 
 ######### Pass environment variables #########
 
@@ -71,7 +69,7 @@ RUN set -ex \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
-    && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
+    && pip install apache-airflow[crypto,celery,log,s3,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && if [ -n "${PYTHON_DEPS}" ]; then pip install ${PYTHON_DEPS}; fi \
     && pip install --user -r ${AIRFLOW_USER_HOME}/requirements.txt \
     && apt-get purge --auto-remove -yqq $buildDeps \
