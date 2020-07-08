@@ -75,6 +75,7 @@ context["dag_run"].conf["ticker"] available in .execute() if  provide_context=Tr
 reddit_operator = RedditOperator(task_id='Get_data_from_reddit',
                                  dag=dag,
                                  provide_context=True,
+                                 if_exists='replace',
                                  cred=reddit_credentials,
                                  ticker = '{{ dag_run.conf["ticker"] }}',
                                  postgres_conn_id=postgres_conn_id)

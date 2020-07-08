@@ -13,8 +13,13 @@ class RedditOperator(BaseOperator):
     def __init__(self,
                  cred,
                  postgres_conn_id: str,
+                 if_exists: str,
                  *args,
                  **kwargs):
+        """
+            input:
+                if_exists: ['fail', 'replace', 'append']
+        """
 
         super(RedditOperator, self).__init__(*args, **kwargs)
 
@@ -26,6 +31,7 @@ class RedditOperator(BaseOperator):
                             user_agent=cred['user_agent'],
                             username=cred['username'],
                             password=cred['password'])
+        self.if_exists = if_exists
 
         # if self.reddit:
         #     self.log.info("Connected Reddit API")
@@ -119,5 +125,5 @@ class RedditOperator(BaseOperator):
 
         # save to tmp table. replace content.
         df.to_sql('tmp', self.engine, index=False,
-                  if_exists='replace', dtype=dtypes_map)
+                  if_exists=self.if_exists, dtype=dtypes_map)
         self.log.info("Saved.")
