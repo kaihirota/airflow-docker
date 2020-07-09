@@ -43,7 +43,7 @@ class RedditBatchOperator(BaseOperator):
             sort_method: relevance, hot, top, new, comments. (default new).
             time_range: all, day, hour, month, week, year (default: all).
         """
-        limit = 50
+        limit = 100
         sort_method = 'new'
         time_range = 'all'
 

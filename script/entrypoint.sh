@@ -18,7 +18,7 @@ export AIRFLOW_HOME \
 
 export AIRFLOW__SMTP__SMTP_PASSWORD=${SMTP_PASSWORD}
 
-# export AIRFLOW_CONN_POSTGRES_TEST=postgresql://${DB_USERNAME}:${DB_NAME}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+# export AIRFLOW_CONN_POSTGRES_TEST=postgresql://${DB_USERNAME}:${DB_PW}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 
 case "$1" in
   webserver)

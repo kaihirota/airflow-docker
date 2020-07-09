@@ -20,4 +20,7 @@ docker exec -it airflow_docker airflow trigger_dag 'Reddit_Sentiment_Analysis' -
 # initial_test = run_id
 # ticker: enter the ticker symbol of the stock
 # limit: 1 - 1000, how many Reddit posts to download
+
+
+docker exec -it airflow_docker airflow trigger_dag 'Monitor_Watchlist' -r 'initial_test'
 ```

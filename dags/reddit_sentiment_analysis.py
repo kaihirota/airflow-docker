@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
 import os
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
+from airflow.operators.dummy_operator import DummyOperator
 from data_quality_operator import DataQualityOperator
 from nlp_operator import NLPOperator
 from reddit_operator import RedditOperator
@@ -72,23 +71,25 @@ context["dag_run"].conf["ticker"] available in .execute() if  provide_context=Tr
 
 """
 
-reddit_operator = RedditOperator(task_id='Get_data_from_reddit',
-                                 dag=dag,
-                                 provide_context=True,
-                                 if_exists='replace',
-                                 cred=reddit_credentials,
-                                 ticker = '{{ dag_run.conf["ticker"] }}',
-                                 postgres_conn_id=postgres_conn_id)
+reddit_operator = RedditOperator(
+                            task_id='Get_data_from_reddit',
+                            provide_context=True,
+                            dag=dag,
+                            postgres_conn_id=postgres_conn_id,
+                            cred=reddit_credentials,
+                            if_exists='replace',
+                            ticker = '{{ dag_run.conf["ticker"] }}')
 
 nlp_operator = NLPOperator(task_id='Run_NLP_pipeline',
-                           dag=dag,
                            provide_context=True,
+                           dag=dag,
                            postgres_conn_id=postgres_conn_id)
 
-run_quality_checks = DataQualityOperator(task_id='Run_data_quality_checks',
-                                         dag=dag,
-                                         provide_context=True,
-                                         postgres_conn_id=postgres_conn_id)
+run_quality_checks = DataQualityOperator(
+                            task_id='Run_data_quality_checks',
+                            provide_context=True,
+                            dag=dag,
+                            postgres_conn_id=postgres_conn_id)
 
 end_operator = DummyOperator(task_id='Stop_execution', dag=dag)
 
