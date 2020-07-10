@@ -9,7 +9,7 @@ ARG AIRFLOW_VERSION=1.10.10
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 ARG AIRFLOW_DEPS=""
-ARG PYTHON_DEPS="praw spacy nltk"
+ARG PYTHON_DEPS="praw spacy nltk alpha_vantage"
 
 # Define en_US.
 ENV LANGUAGE en_US.UTF-8
