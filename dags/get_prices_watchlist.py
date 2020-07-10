@@ -20,6 +20,7 @@ default_args = {
     'max_active_runs': 1
 }
 
+
 dag_name='Fetch_OHLC_Watchlist'
 api_key = os.environ['ALPHA_VANTAGE_API']
 postgres_conn_id = os.environ['DB_AIRFLOW_CONN_ID']
