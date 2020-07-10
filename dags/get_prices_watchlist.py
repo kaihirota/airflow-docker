@@ -28,7 +28,7 @@ dag = DAG(dag_name,
           default_args=default_args,
           description='Get historical daily OHLC data for each stock in watchlist.',
           schedule_interval='@weekly',
-          is_paused_upon_creation=True)
+          is_paused_upon_creation=False)
 
 # clear tmp table first
 sql = """TRUNCATE stocks"""
