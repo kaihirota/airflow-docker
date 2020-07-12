@@ -20,6 +20,7 @@ default_args = {
     'max_active_runs': 1
 }
 
+
 dag_name='Fetch_OHLC_Watchlist'
 api_key = os.environ['ALPHA_VANTAGE_API']
 postgres_conn_id = os.environ['DB_AIRFLOW_CONN_ID']
@@ -28,7 +29,7 @@ dag = DAG(dag_name,
           default_args=default_args,
           description='Get historical daily OHLC data for each stock in watchlist.',
           schedule_interval='@weekly',
-          is_paused_upon_creation=False)
+          is_paused_upon_creation=True)
 
 # clear tmp table first
 sql = """TRUNCATE stocks"""

@@ -25,6 +25,7 @@ ENV LC_MESSAGES en_US.UTF-8
 
 # Copy AIRFLOW files
 COPY script/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 COPY requirements.txt ${AIRFLOW_USER_HOME}/requirements.txt
 COPY dags ${AIRFLOW_USER_HOME}/dags
 COPY plugins ${AIRFLOW_USER_HOME}/plugins

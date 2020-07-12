@@ -24,6 +24,8 @@ case "$1" in
   webserver)
     airflow initdb
 
+    airflow create_user --role Admin --username ${ADMIN_USERNAME} -p ${ADMIN_PW} --email ${ADMIN_EMAIL} -f ${ADMIN_FNAME} -l ${ADMIN_LNAME}
+
     ## this method, unlike setting AIRFLOW_CONN_x environment variable, shows up in Airflow UI. however it must be executed after airflow initdb
 
     # s3 logging

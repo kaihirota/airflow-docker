@@ -28,7 +28,7 @@ dag = DAG(dag_name,
           default_args=default_args,
           description='For each stock in watchlist, Search and run sentiment analysis on Reddit headlines.',
           schedule_interval='@daily',
-          is_paused_upon_creation=False)
+          is_paused_upon_creation=True)
 
 start_operator = DummyOperator(task_id='Begin_execution', dag=dag)
 
