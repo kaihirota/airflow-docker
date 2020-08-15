@@ -7,7 +7,7 @@ from airflow.operators.postgres_operator import PostgresOperator
 
 default_args = {
     'owner': 'kai',
-    'start_date': days_ago(1),
+    'start_date': datetime(2020, 8, 1),
     # 'end_date': datetime(2030, 1, 1),
     'catchup': False,
     'depends_on_past': False,
@@ -32,7 +32,7 @@ postgres_conn_id = os.environ['DB_AIRFLOW_CONN_ID']
 # clear sentiment table first
 sql = """TRUNCATE sentiment"""
 clear_table = PostgresOperator(
-                                task_id='Clear_tmp_table',
+                                task_id='Clear_sentiment_table',
                                 dag=dag,
                                 postgres_conn_id=postgres_conn_id,
                                 sql=sql)
